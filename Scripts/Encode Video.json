@@ -1,16 +1,20 @@
 {
-  "Enabled": true,
-  "Revision": 29,
+  "Name": "Encode Video",
   "Type": 0,
-  "Template": "Blank Video Template",
+  "Revision": 69,
+  "Properties": {
+    "Tags": [],
+    "Fields": [],
+    "Variables": {}
+  },
   "Parts": [
     {
       "Uid": "d3f68634-2e85-4b8f-bc80-baea8fbf8062",
       "Name": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.VideoFile",
       "xPos": 750,
       "yPos": 50,
-      "Icon": "fas fa-video",
       "Label": "",
       "Inputs": 0,
       "Outputs": 1,
@@ -21,20 +25,18 @@
           "InputNode": "1c7e5955-3016-4ed3-8e9e-f2a05bfe7221"
         }
       ],
-      "Type": 0,
-      "Model": null
+      "Type": 0
     },
     {
       "Uid": "fb352bf6-e5b7-4bba-8cad-2da1162ce6f1",
       "Name": "Audio Processing",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.GotoFlow",
       "xPos": 750,
-      "yPos": 430,
-      "Icon": "fas fa-sitemap",
+      "yPos": 460,
       "Label": "",
       "Inputs": 1,
       "Outputs": 0,
-      "OutputConnections": null,
       "Type": 3,
       "Model": {
         "Flow": {
@@ -47,10 +49,34 @@
     {
       "Uid": "1c7e5955-3016-4ed3-8e9e-f2a05bfe7221",
       "Name": "av1an",
+      "Color": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 750,
-      "yPos": 230,
-      "Icon": "fas fa-code",
+      "yPos": 180,
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "fe2ed8bf-aacb-4fad-91a3-5f95dc3d2adb"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Outputs": 1,
+        "Code": "let encoder = \u0027x265\u0027\nlet extra_split = 240\nlet encoding_threads = 4\nlet encoding_parameters = \u0060-p slower --crf 25 -D 10 -F ${encoding_threads} --pools ${encoding_threads} --no-sao --no-strong-intra-smoothing --bframes 8 --psy-rd 2 --psy-rdoq 1 --aq-mode 3 --ref 6 --deblock -1,-1 --no-rect --me 0 --no-b-intra --qcomp 0.5 --qg-size 8 --no-pmode --pme --wpp --scenecut 80 --max-tu-size 8 --b-pyramid\u0060\nlet target_quality = \u002796\u0027\nlet min_q = \u002713\u0027\nlet max_q = \u002740\u0027\n\nlet thread_process = Flow.Execute({\n\tcommand: \u0027nproc\u0027,\n\targumentList: []\n});\n\nLogger.ILog(\u0022Setting threads\u0022);\nlet threads;\nif(thread_process.standardOutput) {\n\tthreads = thread_process.standardOutput\n\tLogger.ILog(\u0027threads: \u0027 \u002B threads);\n}\nif(thread_process.starndardError)\n\tLogger.ILog(\u0027nproc error: \u0027 \u002B thread_process.starndardError);\n\nif(thread_process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed to get threads: \u0027 \u002B thread_process.exitCode);\n\treturn -1;\n}\n\n\nlet workers = Math.max(Math.floor(threads / encoding_threads), 1);\nLogger.ILog(\u0022Workers: \u0022 \u002B workers);\n\nlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileNameNoExtension;\nlet av1an = Flow.GetToolPath(\u0027av1an\u0027);\nlet process = Flow.Execute({\n\tcommand: av1an,\n\targumentList: [\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-y\u0027,\n\t\t\u0027-e\u0027,\n\t\t\u0060${encoder}\u0060,\n\t\t\u0027-v\u0027,\n\t\t\u0060${encoding_parameters}\u0060,\n        \u0027--probe-slow\u0027,\n\t\t\u0027--chunk-method\u0027,\n\t\t\u0027lsmash\u0027,\n\t\t\u0027--target-quality\u0027,\n\t\t\u0060${target_quality}\u0060,\n\t\t\u0027--min-q\u0027,\n\t\t\u0060${min_q}\u0060,\n\t\t\u0027--max-q\u0027,\n\t\t\u0060${max_q}\u0060,\n\t\t\u0027--concat\u0027,\n\t\t\u0027mkvmerge\u0027,\n\t\t\u0027--extra-split\u0027,\n\t\t\u0060${extra_split}\u0060,\n\t\t\u0027--workers\u0027,\n\t\t\u0060${workers}\u0060,\n\t\t\u0027--log-file\u0027,\n\t\t\u0060${output}\u0060,\n\t\t\u0027-o\u0027,\n\t\t\u0060${output}.mkv\u0060\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output\u002B\u0022.mkv\u0022);\nreturn 1;"
+      }
+    },
+    {
+      "Uid": "fe2ed8bf-aacb-4fad-91a3-5f95dc3d2adb",
+      "Name": "vmaf",
+      "ReadOnly": false,
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
+      "xPos": 750,
+      "yPos": 320,
       "Label": "",
       "Inputs": 1,
       "Outputs": 1,
@@ -64,21 +90,8 @@
       "Type": 3,
       "Model": {
         "Outputs": 1,
-        "Code": "let encoder = \u0027x265\u0027\nlet extra_split = 240\nlet encoding_threads = 4\nlet encoding_parameters = \u0060-p slower --crf 25 -D 10 -F ${encoding_threads} --pools ${encoding_threads} --no-sao --no-strong-intra-smoothing --bframes 8 --psy-rd 2 --psy-rdoq 1 --aq-mode 3 --ref 6 --deblock -1,-1 --no-rect --me 0 --no-b-intra --qcomp 0.5 --qg-size 8 --no-pmode --pme --wpp --scenecut 80 --max-tu-size 8 --b-pyramid\u0060\nlet target_quality = \u002796\u0027\nlet min_q = \u002714\u0027\nlet max_q = \u002740\u0027\n\nlet thread_process = Flow.Execute({\n\tcommand: \u0027nproc\u0027,\n\targumentList: []\n});\n\nLogger.ILog(\u0022Setting threads\u0022);\nlet threads;\nif(thread_process.standardOutput) {\n\tthreads = thread_process.standardOutput\n\tLogger.ILog(\u0027threads: \u0027 \u002B threads);\n}\nif(thread_process.starndardError)\n\tLogger.ILog(\u0027nproc error: \u0027 \u002B thread_process.starndardError);\n\nif(thread_process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed to get threads: \u0027 \u002B thread_process.exitCode);\n\treturn -1;\n}\n\n\nlet workers = Math.max(Math.floor(threads / encoding_threads), 1);\nLogger.ILog(\u0022Workers: \u0022 \u002B workers);\n\nlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileNameNoExtension;\nlet av1an = Flow.GetToolPath(\u0027av1an\u0027);\nlet process = Flow.Execute({\n\tcommand: av1an,\n\targumentList: [\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-y\u0027,\n\t\t\u0027-e\u0027,\n\t\t\u0060${encoder}\u0060,\n\t\t\u0027-v\u0027,\n\t\t\u0060${encoding_parameters}\u0060,\n        \u0027--probe-slow\u0027,\n\t\t\u0027--chunk-method\u0027,\n\t\t\u0027lsmash\u0027,\n\t\t\u0027--target-quality\u0027,\n\t\t\u0060${target_quality}\u0060,\n\t\t\u0027--min-q\u0027,\n\t\t\u0060${min_q}\u0060,\n\t\t\u0027--max-q\u0027,\n\t\t\u0060${max_q}\u0060,\n\t\t\u0027--concat\u0027,\n\t\t\u0027mkvmerge\u0027,\n\t\t\u0027--vmaf\u0027,\n\t\t\u0027--vmaf-threads\u0027,\n        \u0060${encoding_threads}\u0060,\n\t\t\u0027--extra-split\u0027,\n\t\t\u0060${extra_split}\u0060,\n\t\t\u0027--workers\u0027,\n\t\t\u0060${workers}\u0060,\n\t\t\u0027--temp\u0027,\n\t\t\u0060${output}\u0060,\n\t\t\u0027--log-file\u0027,\n\t\t\u0060${output}\u0060,\n\t\t\u0027-o\u0027,\n\t\t\u0060${output}.mkv\u0060\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output\u002B\u0022.mkv\u0022);\nreturn 1;"
+        "Code": "let thread_process = Flow.Execute({\n\tcommand: \u0027nproc\u0027,\n\targumentList: []\n});\n\nLogger.ILog(\u0022Setting threads\u0022);\nlet threads;\nif(thread_process.standardOutput) {\n\tthreads = thread_process.standardOutput\n\tLogger.ILog(\u0027threads: \u0027 \u002B threads);\n}\nif(thread_process.starndardError)\n\tLogger.ILog(\u0027nproc error: \u0027 \u002B thread_process.starndardError);\n\nif(thread_process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed to get threads: \u0027 \u002B thread_process.exitCode);\n\treturn -1;\n}\n\n// Max 12 threads due to poor vmaf scaling\nthreads = Math.min(threads, 12)\n\n// Sanitize the name of the video\n// s/[\u0027,]//g\nlet vmaf_json = Variables.file.NameNoExtension.replace(/[,\u0027]/g, \u0027\u0027) \u002B \u0022.json\u0022;\n\nlet process = Flow.Execute({\n\tcommand: \u0027ffmpeg\u0027,\n\targumentList: [\n\t\t\u0027-r\u0027,\n\t\t\u002724\u0027,\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-r\u0027,\n\t\t\u002724\u0027,\n\t\t\u0027-i\u0027,\n\t\tVariables.file.Orig.FullName,\n\t\t\u0027-lavfi\u0027,\n\t\t\u0060libvmaf=n_threads=${threads}:log_fmt=json:log_path=\u0027${vmaf_json}\u0027\u0060,\n\t\t\u0027-f\u0027,\n\t\t\u0027null\u0027,\n\t\t\u0027-\u0027\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nlet plot = Flow.Execute({\n\tcommand: \u0027plot_vmaf.py\u0027,\n\targumentList: [\n\t\t\u0060${vmaf_json}\u0060,\n\t\t\u0027-o\u0027,\n\t\t\u0060${Flow.TempPath}/${Variables.file.NameNoExtension}_vmaf.png\u0060,\n\t\t\u0027--title\u0027,\n\t\tVariables.file.NameNoExtension,\n\t\t\u0027--av1an\u0027,\n\t\t\u0060${Flow.TempPath}/${Variables.file.NameNoExtension}.log\u0060\n\t]\n})\n\nreturn 1;"
       }
     }
-  ],
-  "Default": false,
-  "Properties": {
-    "Description": null,
-    "Author": null,
-    "MinimumVersion": null,
-    "Tags": null,
-    "Fields": [],
-    "Variables": {}
-  },
-  "Uid": "53cd47e8-a6c7-49f6-8871-22f166a3b299",
-  "Name": "Encode Video",
-  "DateCreated": "2022-08-31T21:22:16Z",
-  "DateModified": "2023-11-22T21:23:21Z"
+  ]
 }

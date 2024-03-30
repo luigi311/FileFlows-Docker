@@ -1,12 +1,16 @@
 {
-  "Enabled": true,
-  "Revision": 8,
+  "Name": "Audio Processing Remux",
   "Type": 0,
-  "Template": "Blank Video Template",
+  "Revision": 13,
+  "Properties": {
+    "Fields": [],
+    "Variables": {}
+  },
   "Parts": [
     {
       "Uid": "211228c9-fa79-4ece-9ea8-631dc1684003",
       "Name": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.VideoFile",
       "xPos": 450,
       "yPos": 30,
@@ -27,6 +31,7 @@
     {
       "Uid": "be9234fe-6b2e-45d4-ba26-6140a410baf7",
       "Name": "Audio Compress",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 950,
       "yPos": 330,
@@ -55,6 +60,7 @@
     {
       "Uid": "e986f6cf-f4ef-46ef-b7c4-cae744b3a8fe",
       "Name": "mkvmerge remux",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 980,
       "yPos": 560,
@@ -78,6 +84,7 @@
     {
       "Uid": "a4d820ee-55c4-4e40-a612-a63c3c62c50a",
       "Name": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
       "xPos": 890,
       "yPos": 450,
@@ -98,6 +105,7 @@
     {
       "Uid": "45332e87-37cb-40b0-821f-daf5ca2598ae",
       "Name": "Nightmode",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 450,
       "yPos": 530,
@@ -126,6 +134,7 @@
     {
       "Uid": "2c421c0d-edc9-4a88-9a9e-804ae9204299",
       "Name": "Generate Screenshot",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 980,
       "yPos": 670,
@@ -143,12 +152,13 @@
       "Type": 3,
       "Model": {
         "Outputs": 1,
-        "Code": "let output = Flow.TempPath \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileName \u002B \u0027.jpg\u0027;\r\nlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\r\nlet process = Flow.Execute({\r\n\tcommand: ffmpeg,\r\n\targumentList: [\r\n\t\t\u0027-ss\u0027,\r\n\t\t\u002700:10:00\u0027,\r\n\t\t\u0027-i\u0027,\r\n\t\tVariables.file.FullName,\r\n\t\t\u0027-frames:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-qmin\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-q:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\toutput\r\n\t]\r\n});\r\n\r\nif(process.starndardError)\r\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\nif(process.exitCode !== 0){\r\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\treturn -1;\r\n}\r\n\r\nreturn 1;"
+        "Code": "let output = Flow.TempPath \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileNameNoExtension;\r\nlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\r\n\r\nlet process = Flow.Execute({\r\n\tcommand: ffmpeg,\r\n\targumentList: [\r\n\t\t\u0027-ss\u0027,\r\n\t\t\u002700:08:00\u0027,\r\n\t\t\u0027-i\u0027,\r\n\t\tVariables.file.FullName,\r\n\t\t\u0027-frames:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-qmin\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-q:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0060${output}1.jpg\u0060\r\n\t]\r\n});\r\n\r\nif(process.starndardError)\r\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\nif(process.exitCode !== 0){\r\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\treturn -1;\r\n}\r\n\r\n\r\n\r\n\r\nlet process = Flow.Execute({\r\n\tcommand: ffmpeg,\r\n\targumentList: [\r\n\t\t\u0027-ss\u0027,\r\n\t\t\u002700:10:00\u0027,\r\n\t\t\u0027-i\u0027,\r\n\t\tVariables.file.FullName,\r\n\t\t\u0027-frames:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-qmin\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-q:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0060${output}2.jpg\u0060\r\n\t]\r\n});\r\n\r\nif(process.starndardError)\r\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\nif(process.exitCode !== 0){\r\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\treturn -1;\r\n}\r\n\r\nlet process = Flow.Execute({\r\n\tcommand: ffmpeg,\r\n\targumentList: [\r\n\t\t\u0027-ss\u0027,\r\n\t\t\u002700:12:00\u0027,\r\n\t\t\u0027-i\u0027,\r\n\t\tVariables.file.FullName,\r\n\t\t\u0027-frames:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-qmin\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0027-q:v\u0027,\r\n\t\t\u00271\u0027,\r\n\t\t\u0060${output}3.jpg\u0060\r\n\t]\r\n});\r\n\r\nif(process.starndardError)\r\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\nif(process.exitCode !== 0){\r\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\treturn -1;\r\n}\r\n\r\n\r\nreturn 1;"
       }
     },
     {
       "Uid": "40b43ea6-d766-45e3-8e30-99fc21f3180e",
       "Name": "Encode Audio to Flac",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 480,
       "yPos": 770,
@@ -177,6 +187,7 @@
     {
       "Uid": "770c8778-172b-4aab-be1a-2e9effb50092",
       "Name": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
       "xPos": 350,
       "yPos": 900,
@@ -197,6 +208,7 @@
     {
       "Uid": "10172d55-6f6e-448b-82c6-fe8dbad4adcb",
       "Name": "Remove Commentary",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderAudioTrackRemover",
       "xPos": 450,
       "yPos": 220,
@@ -229,6 +241,7 @@
     {
       "Uid": "03caa81f-dc9a-4a56-b2f1-78f067b6b0a1",
       "Name": "FFMPEG Builder: Start",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderStart",
       "xPos": 450,
       "yPos": 120,
@@ -249,6 +262,7 @@
     {
       "Uid": "498b4d2f-f0ff-4713-b302-f794db944ae5",
       "Name": "FFMPEG Builder: Executor",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
       "xPos": 450,
       "yPos": 430,
@@ -276,6 +290,7 @@
     {
       "Uid": "74ce6783-ff5a-48d0-94d3-973c09dde3a2",
       "Name": "FFMPEG Builder: Start",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderStart",
       "xPos": 510,
       "yPos": 1020,
@@ -296,6 +311,7 @@
     {
       "Uid": "cc17d75f-ce5f-453a-b3c2-35d65f20105e",
       "Name": "Normalize audio",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderAudioNormalization",
       "xPos": 950,
       "yPos": 40,
@@ -326,6 +342,7 @@
     {
       "Uid": "6a589e9c-11d3-4d0e-9e4a-fbf746cf2a02",
       "Name": "FFMPEG Builder: Executor",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
       "xPos": 950,
       "yPos": 180,
@@ -353,6 +370,7 @@
     {
       "Uid": "a1e87fe1-6a78-4cbc-ab12-7d42f4bbaaae",
       "Name": "",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
       "xPos": 360,
       "yPos": 660,
@@ -373,6 +391,7 @@
     {
       "Uid": "291820e9-89a1-4d9d-b97f-9277755fe8b5",
       "Name": "Remove Cover",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderAudioTrackRemover",
       "xPos": 450,
       "yPos": 330,
@@ -406,6 +425,7 @@
     {
       "Uid": "55049ee9-ab14-49b0-ab1c-2968304699e9",
       "Name": "Move",
+      "ReadOnly": false,
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 980,
       "yPos": 790,
@@ -413,7 +433,6 @@
       "Label": "",
       "Inputs": 1,
       "Outputs": 2,
-      "OutputConnections": null,
       "Type": 2,
       "Model": {
         "DestinationPath": "/media/Seed/Encoded",
@@ -423,25 +442,11 @@
         "AdditionalFiles": [
           "*.png",
           "*.jpg",
-          "*.svg",
           "*.log"
         ],
         "AdditionalFilesFromOriginal": false,
         "PreserverOriginalDates": false
       }
     }
-  ],
-  "Default": false,
-  "Properties": {
-    "Description": null,
-    "Author": null,
-    "MinimumVersion": null,
-    "Tags": null,
-    "Fields": [],
-    "Variables": {}
-  },
-  "Uid": "2f002c50-48f0-4d8c-9bb9-73e988f55b07",
-  "Name": "Audio Processing Remux",
-  "DateCreated": "2022-08-16T01:27:23Z",
-  "DateModified": "2023-11-22T03:46:36Z"
+  ]
 }
