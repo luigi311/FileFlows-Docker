@@ -4,11 +4,11 @@ set -e
 if [[ "$FFNODE" == 'true' || "$FFNODE" == '1' || "$1" = '--node' ]]; then
     printf "Launching node\n"
     cd /app/Node
-    exec ./run-node.sh
+    exec dotnet FileFlows.Node.dll
 
 else
     printf "Launching server\n"
     cd /app/Server
-    exec ./run-server.sh
+    exec dotnet FileFlows.Server.dll
 
 fi
