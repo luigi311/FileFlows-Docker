@@ -9,6 +9,6 @@ if [[ "$FFNODE" == 'true' || "$FFNODE" == '1' || "$1" = '--node' ]]; then
 else
     printf "Launching server\n"
     cd /app/Server
-    exec run-server.sh
+    exec ./run-server.sh
 
 fi
