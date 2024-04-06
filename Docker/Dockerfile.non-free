@@ -28,4 +28,5 @@ RUN git clone https://github.com/luigi311/Plot_Vmaf && \
 # expose the ports we need
 EXPOSE 5000
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/sbin/tini", "--"]
+CMD ["/app/docker-entrypoint.sh"]
