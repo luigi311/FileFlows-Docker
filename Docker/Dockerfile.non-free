@@ -6,7 +6,7 @@ WORKDIR /app
 # Install DotNet
 RUN wget https://dot.net/v1/dotnet-install.sh && \
     chmod +x dotnet-install.sh && \
-    ./dotnet-install.sh -c 7.0 --install-dir /usr/local/bin && \
+    ./dotnet-install.sh -c 8.0 --install-dir /usr/local/bin && \
     rm dotnet-install.sh
 
 # copy the deploy file into the app directory
